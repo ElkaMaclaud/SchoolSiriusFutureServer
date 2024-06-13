@@ -1,4 +1,4 @@
-const controller = require("./authController");
+const controller = require("./controller");
 const { check } = require("express-validator");
 const authMiddleware = require("./middleware/authMiddleware");
 const express = require("express");
@@ -18,8 +18,10 @@ router.post(
   controller.registration
 );
 router.post("/login", controller.login);
-router.get("/get_data", authMiddleware, controller.getData);
-router.get("/download_resume", authMiddleware, controller.getFile);
+router.post("/lessons", controller.createLesson);
+router.get("/lessonsName", controller.getLessonsName);
+router.get("/lessonsDate", controller.getLessonsDate);
+
 
 
 module.exports = router;

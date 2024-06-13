@@ -1,12 +1,10 @@
 const User = require("./models/User");
-const Data = require("./models/Data");
+const Lessons = require("./models/Lessons");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const generateAccessToken = require("./utils/generateAccessToken");
-const path = require("path");
-const fs = require("fs");
 
-class authController {
+class Controller {
   async registration(req, res) {
     try {
       const errors = validationResult(req);
@@ -77,10 +75,9 @@ class authController {
         .json({ success: false, message: "Ошибка получения данных" });
     }
   }
-  async getData(req, res) {
+  async getLessonsName(req, res) {
     try {
-      //const data = await readFileData();
-      const data = await Data.find();
+      const data = await Lessons.find({lessonName: req.body.name});
       res.json({
         success: true,
         data: data,
@@ -92,5 +89,37 @@ class authController {
         .json({ success: false, message: "Ошибка получения данных" });
     }
   }
+  async getLessonsDate(req, res) {
+    try {
+      const data = await Lessons.find({
+        lessonName: req.body.name, 
+        date: {  
+        $gte: startDate, 
+        $lte: endDate,  } 
+      });        
+      res.json({
+        success: true,
+        data: data,
+        message: "Данные успешно получены",
+      });
+    } catch (e) {
+      res
+        .status(400)
+        .json({ success: false, message: "Ошибка получения данных" });
+    }
+  }
+  async createLesson(req, res) {
+    if (Array.isArray(req.body)) {
+      const lessons = req.body.map(({ lessonName, date }) => ({ lessonName, date }));
+      await Lessons.insertMany(lessons);
+      res.status(201).json({ message: 'Lessons created' });
+    } else {
+      res.status(400).json({ message: 'Invalid request body' });
+    }
+  }
+  
+  
 }
-module.exports = new authController();
+
+
+module.exports = new Controller();
