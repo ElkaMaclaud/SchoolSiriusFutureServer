@@ -63,7 +63,7 @@ class Controller {
   async getData(req, res) {
     try {
       //const data = await readFileData();
-      const data = await Data.find();
+      const data = await Lessons.find();
       res.json({
         success: true,
         data: data,
@@ -77,7 +77,7 @@ class Controller {
   }
   async getLessonsName(req, res) {
     try {
-      const data = await Lessons.find({lessonName: req.body.name});
+      const data = await Lessons.find({ lessonName: req.body.name });
       res.json({
         success: true,
         data: data,
@@ -91,12 +91,16 @@ class Controller {
   }
   async getLessonsDate(req, res) {
     try {
+      const { name, startDate, endDate } = req.body;
+
       const data = await Lessons.find({
-        lessonName: req.body.name, 
-        date: {  
-        $gte: startDate, 
-        $lte: endDate,  } 
-      });        
+        lessonName: name,
+        date: {
+          $gte: startDate,
+          $lte: endDate,
+        },
+      });
+
       res.json({
         success: true,
         data: data,
@@ -108,18 +112,84 @@ class Controller {
         .json({ success: false, message: "Ошибка получения данных" });
     }
   }
+
   async createLesson(req, res) {
     if (Array.isArray(req.body)) {
-      const lessons = req.body.map(({ lessonName, date }) => ({ lessonName, date }));
+      const lessons = req.body.map(({ lessonName, date, teacher }) => ({
+        lessonName,
+        date,
+        teacher,
+      }));
       await Lessons.insertMany(lessons);
-      res.status(201).json({ message: 'Lessons created' });
+      res.status(201).json({ message: "Lessons created" });
     } else {
-      res.status(400).json({ message: 'Invalid request body' });
+      res.status(400).json({ message: "Invalid request body" });
     }
   }
-  
-  
-}
+  async getLessonCounts(req, res) {
+    try {
+      const lessonCounts = await Lessons.aggregate([
+        { $group: { _id: "$lessonName", count: { $sum: 1 } } },
+        { $project: { _id: 0, lessonName: "$_id", count: 1 } },
+      ]);
 
+      const result = {};
+      lessonCounts.forEach((item) => {
+        result[item.lessonName] = item.count;
+      });
+
+      res.json({
+        success: true,
+        data: result,
+        message: "Данные успешно получены",
+      });
+    } catch (e) {
+      res
+        .status(400)
+        .json({ success: false, message: "Ошибка получения данных" });
+    }
+  }
+
+  async getUpcomingLessons(req, res) {
+    try {
+      const now = new Date();
+      const currentDate = now.toISOString().slice(0, 10);
+      const lessons = await Lessons.find({
+        date: { $gte: currentDate },
+      })
+        .sort({ date: 1 })
+        .limit(3);
+
+      if (lessons.length > 0) {
+        const nearestLesson = lessons[0];
+        const dateFromString = new Date(nearestLesson.date); 
+        const timeToNextLesson = dateFromString.getTime() - now.getTime();
+
+        const daysToNextLesson = Math.floor(
+          timeToNextLesson / (1000 * 60 * 60 * 24)
+        );
+        const hoursToNextLesson = Math.floor(
+          (timeToNextLesson % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+        );
+        const minutesToNextLesson = Math.floor(
+          (timeToNextLesson % (1000 * 60 * 60)) / (1000 * 60)
+        );
+
+        res.status(200).json({
+          lessons,
+          timeToNextLesson: {
+            days: daysToNextLesson,
+            hours: hoursToNextLesson,
+            minutes: minutesToNextLesson,
+          },
+        });
+      } else {
+        res.status(200).json({ message: "No upcoming lessons found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+}
 
 module.exports = new Controller();
