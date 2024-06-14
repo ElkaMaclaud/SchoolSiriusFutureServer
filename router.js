@@ -19,8 +19,9 @@ router.post(
 );
 router.post("/login", controller.login);
 router.post("/lessons", controller.createLesson);
-router.get("/lessonsName", controller.getLessonsName);
 router.post("/lessonsDate", controller.getLessonsDate);
+router.get("/getUsers", controller.getAllUsers);
+router.get("/lessonsName", controller.getLessonsName);
 router.get("/lessonCounts", controller.getLessonCounts);
 router.get("/upcomingLessons", controller.getUpcomingLessons);
 

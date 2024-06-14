@@ -112,14 +112,30 @@ class Controller {
         .json({ success: false, message: "Ошибка получения данных" });
     }
   }
-
+  async getAllUsers(req, res) {
+    try {
+      const users = await User.find();
+      res.json({
+        success: true,
+        data: users,
+        message: "Данные успешно получены",
+      });
+    } catch (error) {
+      console.error("Ошибка получения пользователей:", error);
+      throw error;
+    }
+  }
   async createLesson(req, res) {
     if (Array.isArray(req.body)) {
-      const lessons = req.body.map(({ lessonName, date, teacher }) => ({
-        lessonName,
-        date,
-        teacher,
-      }));
+      const lessons = req.body.map(
+        ({ lessonName, date, teacher, paid, wasAbsent }) => ({
+          lessonName,
+          date,
+          teacher,
+          paid,
+          wasAbsent,
+        })
+      );
       await Lessons.insertMany(lessons);
       res.status(201).json({ message: "Lessons created" });
     } else {
@@ -162,7 +178,7 @@ class Controller {
 
       if (lessons.length > 0) {
         const nearestLesson = lessons[0];
-        const dateFromString = new Date(nearestLesson.date); 
+        const dateFromString = new Date(nearestLesson.date);
         const timeToNextLesson = dateFromString.getTime() - now.getTime();
 
         const daysToNextLesson = Math.floor(
