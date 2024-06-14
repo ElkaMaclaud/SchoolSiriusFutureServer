@@ -20,7 +20,7 @@ router.post(
 router.post("/login", controller.login);
 router.post("/lessons", controller.createLesson);
 router.get("/lessonsName", controller.getLessonsName);
-router.get("/lessonsDate", controller.getLessonsDate);
+router.post("/lessonsDate", controller.getLessonsDate);
 router.get("/lessonCounts", controller.getLessonCounts);
 router.get("/upcomingLessons", controller.getUpcomingLessons);
 
