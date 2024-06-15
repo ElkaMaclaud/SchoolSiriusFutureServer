@@ -197,15 +197,15 @@ class Controller {
             const daysToNextLesson = Math.max(0, Math.floor(timeToNextLesson / (1000 * 60 * 60 * 24)));
             const hoursToNextLesson = Math.max(0, Math.floor((timeToNextLesson % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
             const minutesToNextLesson = Math.max(0, Math.floor((timeToNextLesson % (1000 * 60 * 60)) / (1000 * 60)));
-  
-            res.status(200).json({
-              success: true,
-              lessons: tomorrowLessons,
+            const data = {lessons: tomorrowLessons,
               timeToNextLesson: {
                 days: daysToNextLesson,
                 hours: hoursToNextLesson,
                 minutes: minutesToNextLesson,
-              },
+              },}
+            res.status(200).json({
+              success: true,
+              data: data,
               message: "Данные успешно получены",
             });
           } else {
