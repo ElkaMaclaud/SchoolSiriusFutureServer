@@ -62,7 +62,6 @@ class Controller {
   }
   async getData(req, res) {
     try {
-      //const data = await readFileData();
       const data = await Lessons.find();
       res.json({
         success: true,
@@ -175,37 +174,69 @@ class Controller {
       })
         .sort({ date: 1 })
         .limit(3);
-
+  
       if (lessons.length > 0) {
         const nearestLesson = lessons[0];
         const dateFromString = new Date(nearestLesson.date);
         const timeToNextLesson = dateFromString.getTime() - now.getTime();
-
-        const daysToNextLesson = Math.floor(
-          timeToNextLesson / (1000 * 60 * 60 * 24)
-        );
-        const hoursToNextLesson = Math.floor(
-          (timeToNextLesson % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        );
-        const minutesToNextLesson = Math.floor(
-          (timeToNextLesson % (1000 * 60 * 60)) / (1000 * 60)
-        );
-
-        res.status(200).json({
-          lessons,
-          timeToNextLesson: {
-            days: daysToNextLesson,
-            hours: hoursToNextLesson,
-            minutes: minutesToNextLesson,
-          },
-        });
+  
+        if (timeToNextLesson <= 0) {
+          const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+          const tomorrowDate = tomorrow.toISOString().slice(0, 10);
+          const tomorrowLessons = await Lessons.find({
+            date: { $gte: tomorrowDate },
+          })
+            .sort({ date: 1 })
+            .limit(3);
+  
+          if (tomorrowLessons.length > 0) {
+            const nextLesson = tomorrowLessons[0];
+            const nextLessonDate = new Date(nextLesson.date);
+            const timeToNextLesson = nextLessonDate.getTime() - now.getTime();
+  
+            const daysToNextLesson = Math.max(0, Math.floor(timeToNextLesson / (1000 * 60 * 60 * 24)));
+            const hoursToNextLesson = Math.max(0, Math.floor((timeToNextLesson % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+            const minutesToNextLesson = Math.max(0, Math.floor((timeToNextLesson % (1000 * 60 * 60)) / (1000 * 60)));
+  
+            res.status(200).json({
+              success: true,
+              lessons: tomorrowLessons,
+              timeToNextLesson: {
+                days: daysToNextLesson,
+                hours: hoursToNextLesson,
+                minutes: minutesToNextLesson,
+              },
+              message: "Данные успешно получены",
+            });
+          } else {
+            res.status(200).json({ message: "Нет предстоящих уроков" });
+          }
+        } else {
+          const daysToNextLesson = Math.max(0, Math.floor(timeToNextLesson / (1000 * 60 * 60 * 24)));
+          const hoursToNextLesson = Math.max(0, Math.floor((timeToNextLesson % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+          const minutesToNextLesson = Math.max(0, Math.floor((timeToNextLesson % (1000 * 60 * 60)) / (1000 * 60)));
+  
+          res.status(200).json({
+            success: true,
+            lessons,
+            timeToNextLesson: {
+              days: daysToNextLesson,
+              hours: hoursToNextLesson,
+              minutes: minutesToNextLesson,
+            },
+            message: "Данные успешно получены",
+          });
+        }
       } else {
-        res.status(200).json({ message: "No upcoming lessons found" });
+        res.status(200).json({ message: "Нет предстоящих уроков" });
       }
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500).json({ message: "Ошибка получения данных" });
     }
   }
-}
-
+  
+  
+  
+  
+}  
 module.exports = new Controller();
