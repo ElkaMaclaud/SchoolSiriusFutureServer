@@ -18,12 +18,12 @@ router.post(
   controller.registration
 );
 router.post("/login", controller.login);
-router.post("/lessons", controller.createLesson);
-router.post("/lessonsDate", controller.getLessonsDate);
-router.get("/getUsers", controller.getAllUsers);
-router.get("/lessonsName", controller.getLessonsName);
-router.get("/lessonCounts", controller.getLessonCounts);
-router.get("/upcomingLessons", controller.getUpcomingLessons);
+router.post("/lessons", authMiddleware, controller.createLesson);
+router.post("/lessonsDate", authMiddleware, controller.getLessonsDate);
+router.get("/getUsers", authMiddleware, controller.getAllUsers);
+router.get("/lessonsName", authMiddleware, controller.getLessonsName);
+router.get("/lessonCounts", authMiddleware, controller.getLessonCounts);
+router.get("/upcomingLessons", authMiddleware, controller.getUpcomingLessons);
 
 
 
