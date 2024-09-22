@@ -262,13 +262,23 @@ class Controller {
   }
   async updateLessons(req, res) {
     try {
-      const lessons = await req.boby.json();
-      await lessons.map(lesson => {
-        return Lessons.updateOne(
-          { _id: lesson._id }, 
-          { $set: lesson }  
-        );
-      });
+      const lessons = req.body;
+      // await Promise.all(lessons.map(lesson => {
+      //   return Lessons.updateOne(
+      //     { _id: lesson._id },
+      //     { $set: lesson }
+      //   );
+      // }));
+      
+      await Lessons.bulkWrite(
+        lessons.map((lesson) => ({
+          updateOne: {
+            filter: { _id: lesson._id },
+            update: { $set: { date: lesson.date } },
+          },
+        }))
+      );
+
       res
         .status(200)
         .json({ success: true, message: "Данные успешно обновлены" });
