@@ -19,11 +19,13 @@ router.post(
 );
 router.post("/login", controller.login);
 router.post("/lessons", authMiddleware, controller.createLesson);
-router.post("/lessonsDate", authMiddleware, controller.getLessonsDate);
+router.post("/lessonsByDate", authMiddleware, controller.getLessonsByDate);
+router.post("/updateLessons", authMiddleware, controller.updateLessons);
 router.get("/getUsers", authMiddleware, controller.getAllUsers);
 router.get("/lessonsName", authMiddleware, controller.getLessonsName);
 router.get("/lessonCounts", authMiddleware, controller.getLessonCounts);
 router.get("/upcomingLessons", authMiddleware, controller.getUpcomingLessons);
+
 
 
 

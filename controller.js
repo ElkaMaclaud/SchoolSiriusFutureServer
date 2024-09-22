@@ -88,7 +88,7 @@ class Controller {
         .json({ success: false, message: "Ошибка получения данных" });
     }
   }
-  async getLessonsDate(req, res) {
+  async getLessonsByDate(req, res) {
     try {
       const { name, startDate, endDate } = req.body;
 
@@ -122,23 +122,6 @@ class Controller {
     } catch (error) {
       console.error("Ошибка получения пользователей:", error);
       throw error;
-    }
-  }
-  async createLesson(req, res) {
-    if (Array.isArray(req.body)) {
-      const lessons = req.body.map(
-        ({ lessonName, date, teacher, paid, wasAbsent }) => ({
-          lessonName,
-          date,
-          teacher,
-          paid,
-          wasAbsent,
-        })
-      );
-      await Lessons.insertMany(lessons);
-      res.status(201).json({ message: "Lessons created" });
-    } else {
-      res.status(400).json({ message: "Invalid request body" });
     }
   }
   async getLessonCounts(req, res) {
@@ -234,7 +217,34 @@ class Controller {
       res.status(500).json({ message: "Ошибка получения данных" });
     }
   }
-  
+  async createLesson(req, res) {
+    if (Array.isArray(req.body)) {
+      const lessons = req.body.map(
+        ({ lessonName, date, teacher, paid, wasAbsent }) => ({
+          lessonName,
+          date,
+          teacher,
+          paid,
+          wasAbsent,
+        })
+      );
+      await Lessons.insertMany(lessons);
+      res.status(201).json({ message: "Lessons created" });
+    } else {
+      res.status(400).json({ message: "Invalid request body" });
+    }
+  }  
+  async updateLessons(req, res) {
+    try {
+      const lessons = await req.boby.json()
+      await Lessons.updateMany(lessons)
+      res.status(200).json({ success: true,
+        message: "Данные успешно обновлены"})
+    } catch {
+      res.status(200).json({ success: false,
+        message: "Ошибка обнговления данных"})
+    }
+  }
   
   
   
