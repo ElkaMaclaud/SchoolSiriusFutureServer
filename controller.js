@@ -157,12 +157,12 @@ class Controller {
       })
         .sort({ date: 1 })
         .limit(3);
-  
+
       if (lessons.length > 0) {
         const nearestLesson = lessons[0];
         const dateFromString = new Date(nearestLesson.date);
         const timeToNextLesson = dateFromString.getTime() - now.getTime();
-  
+
         if (timeToNextLesson <= 0) {
           const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
           const tomorrowDate = tomorrow.toISOString().slice(0, 10);
@@ -171,21 +171,34 @@ class Controller {
           })
             .sort({ date: 1 })
             .limit(3);
-  
+
           if (tomorrowLessons.length > 0) {
             const nextLesson = tomorrowLessons[0];
             const nextLessonDate = new Date(nextLesson.date);
             const timeToNextLesson = nextLessonDate.getTime() - now.getTime();
-  
-            const daysToNextLesson = Math.max(0, Math.floor(timeToNextLesson / (1000 * 60 * 60 * 24)));
-            const hoursToNextLesson = Math.max(0, Math.floor((timeToNextLesson % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-            const minutesToNextLesson = Math.max(0, Math.floor((timeToNextLesson % (1000 * 60 * 60)) / (1000 * 60)));
-            const data = {lessons: tomorrowLessons,
+
+            const daysToNextLesson = Math.max(
+              0,
+              Math.floor(timeToNextLesson / (1000 * 60 * 60 * 24))
+            );
+            const hoursToNextLesson = Math.max(
+              0,
+              Math.floor(
+                (timeToNextLesson % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+              )
+            );
+            const minutesToNextLesson = Math.max(
+              0,
+              Math.floor((timeToNextLesson % (1000 * 60 * 60)) / (1000 * 60))
+            );
+            const data = {
+              lessons: tomorrowLessons,
               timeToNextLesson: {
                 days: daysToNextLesson,
                 hours: hoursToNextLesson,
                 minutes: minutesToNextLesson,
-              },}
+              },
+            };
             res.status(200).json({
               success: true,
               data: data,
@@ -195,15 +208,28 @@ class Controller {
             res.status(200).json({ message: "Нет предстоящих уроков" });
           }
         } else {
-          const daysToNextLesson = Math.max(0, Math.floor(timeToNextLesson / (1000 * 60 * 60 * 24)));
-          const hoursToNextLesson = Math.max(0, Math.floor((timeToNextLesson % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-          const minutesToNextLesson = Math.max(0, Math.floor((timeToNextLesson % (1000 * 60 * 60)) / (1000 * 60)));
-          const data = {lessons,
-          timeToNextLesson: {
-            days: daysToNextLesson,
-            hours: hoursToNextLesson,
-            minutes: minutesToNextLesson,
-          },}
+          const daysToNextLesson = Math.max(
+            0,
+            Math.floor(timeToNextLesson / (1000 * 60 * 60 * 24))
+          );
+          const hoursToNextLesson = Math.max(
+            0,
+            Math.floor(
+              (timeToNextLesson % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+            )
+          );
+          const minutesToNextLesson = Math.max(
+            0,
+            Math.floor((timeToNextLesson % (1000 * 60 * 60)) / (1000 * 60))
+          );
+          const data = {
+            lessons,
+            timeToNextLesson: {
+              days: daysToNextLesson,
+              hours: hoursToNextLesson,
+              minutes: minutesToNextLesson,
+            },
+          };
           res.status(200).json({
             success: true,
             data,
@@ -233,20 +259,24 @@ class Controller {
     } else {
       res.status(400).json({ message: "Invalid request body" });
     }
-  }  
+  }
   async updateLessons(req, res) {
     try {
-      const lessons = await req.boby.json()
-      await Lessons.updateMany(lessons)
-      res.status(200).json({ success: true,
-        message: "Данные успешно обновлены"})
+      const lessons = await req.boby.json();
+      await lessons.map(lesson => {
+        return Lessons.updateOne(
+          { _id: lesson._id }, 
+          { $set: lesson }  
+        );
+      });
+      res
+        .status(200)
+        .json({ success: true, message: "Данные успешно обновлены" });
     } catch {
-      res.status(200).json({ success: false,
-        message: "Ошибка обнговления данных"})
+      res
+        .status(400)
+        .json({ success: false, message: "Ошибка обнговления данных" });
     }
   }
-  
-  
-  
-}  
+}
 module.exports = new Controller();
