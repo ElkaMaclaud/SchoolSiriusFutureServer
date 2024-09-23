@@ -31,7 +31,7 @@ class Controller {
       });
     } catch (e) {
       console.log(e);
-      res.status(400).json({ success: false, message: "Registration error" });
+      res.status(500).json({ success: false, message: "Registration error" });
     }
   }
 
@@ -57,7 +57,7 @@ class Controller {
       return res.json({ success: true, token });
     } catch (e) {
       console.log(e);
-      res.status(400).json({ success: false, message: "Login error" });
+      res.status(500).json({ success: false, message: "Login error" });
     }
   }
   async getData(req, res) {
@@ -70,7 +70,7 @@ class Controller {
       });
     } catch (e) {
       res
-        .status(400)
+        .status(500)
         .json({ success: false, message: "Ошибка получения данных" });
     }
   }
@@ -120,8 +120,9 @@ class Controller {
         message: "Данные успешно получены",
       });
     } catch (error) {
-      console.error("Ошибка получения пользователей:", error);
-      throw error;
+      res
+        .status(400)
+        .json({ success: false, message: "Ошибка получения данных" });
     }
   }
   async getLessonCounts(req, res) {
@@ -244,20 +245,42 @@ class Controller {
     }
   }
   async createLesson(req, res) {
-    if (Array.isArray(req.body)) {
-      const lessons = req.body.map(
-        ({ lessonName, date, teacher, paid, wasAbsent }) => ({
-          lessonName,
-          date,
-          teacher,
-          paid,
-          wasAbsent,
-        })
-      );
-      await Lessons.insertMany(lessons);
-      res.status(201).json({ message: "Lessons created" });
-    } else {
-      res.status(400).json({ message: "Invalid request body" });
+    try {
+      // const lesson = new Lessons(req.body);
+      // await Lessons.create(lesson);
+      const lesson = new Lessons(req.body);
+      await Lessons.save(lesson);
+      res.status(201).json({  success: true,  message: "Lesson created" });
+    } catch {
+      res.status(500).json({ success: false,  message: "Lessons created" });
+    }
+  }
+  async createLessons(req, res) {
+    try {
+      if (Array.isArray(req.body)) {
+        const lessons = req.body.map(
+          ({ lessonName, date, teacher, paid, wasAbsent }) => ({
+            lessonName,
+            date,
+            teacher,
+            paid,
+            wasAbsent,
+          })
+        );
+        await Lessons.insertMany(lessons);
+        res.status(201).json({ success: true, message: "Lessons created" });
+      }
+    } catch {
+      res.status(500).json({ success: false, message: "Invalid request body" });
+    }
+  }
+  async updateLesson(req, res) {
+    try {
+      const lesson = req.body
+      const lessonId = req.body._id; 
+      await Lessons.findOneAndUpdate({ _id: lessonId }, lesson, { new: true });
+    } catch {
+      res.status(500).json({ success: false,  message: "Lessons created" });
     }
   }
   async updateLessons(req, res) {
@@ -269,7 +292,7 @@ class Controller {
       //     { $set: lesson }
       //   );
       // }));
-      
+
       await Lessons.bulkWrite(
         lessons.map((lesson) => ({
           updateOne: {
@@ -284,8 +307,24 @@ class Controller {
         .json({ success: true, message: "Данные успешно обновлены" });
     } catch {
       res
-        .status(400)
+        .status(500)
         .json({ success: false, message: "Ошибка обнговления данных" });
+    }
+  }
+  async deleteLesson(req, res) {
+    try {
+      const lessonId = req.params.id; 
+      await Lessons.findByIdAndDelete(lessonId)
+    } catch {
+      res.status(500).json({ success: false,  message: "Lessons created" });
+    }
+  }
+  async deleteLessons(req, res) {
+    try {
+      const lessons = req.body; 
+      await Lessons.deleteMany({ _id: { $in: lessons.map((l) => l._id) } });
+    } catch {
+      res.status(500).json({ success: false,  message: "Lessons created" });
     }
   }
 }

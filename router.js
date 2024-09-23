@@ -18,9 +18,14 @@ router.post(
   controller.registration
 );
 router.post("/login", controller.login);
-router.post("/lessons", authMiddleware, controller.createLesson);
+router.post("/createLesson", authMiddleware, controller.createLesson);
+router.post("/createLessons", authMiddleware, controller.createLessons);
 router.post("/lessonsByDate", authMiddleware, controller.getLessonsByDate);
-router.post("/updateLessons", authMiddleware, controller.updateLessons);
+router.update("/updateLesson", authMiddleware, controller.updateLesson);
+router.update("/updateLessons", authMiddleware, controller.updateLessons);
+router.delete("/deleteLesson", authMiddleware, controller.deleteLesson);
+router.delete("/deleteLessons", authMiddleware, controller.deleteLessons);
+router.post("/createLesson", authMiddleware, controller.createLesson);
 router.get("/getUsers", authMiddleware, controller.getAllUsers);
 router.get("/lessonsName", authMiddleware, controller.getLessonsName);
 router.get("/lessonCounts", authMiddleware, controller.getLessonCounts);
