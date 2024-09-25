@@ -7,7 +7,7 @@ const router = express.Router();
 router.post(
   "/registration",
   [
-    check("email", "Имя пользователя не может быть пустым").notEmpty(),
+    check("email", "Имя пользователя не может быть пустым").notEmpty().isEmail(),
     check(
       "password",
       "Пароль должен быть более 4 символов и не более 18 символов"
