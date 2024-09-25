@@ -51,7 +51,7 @@ class Controller {
           .status(400)
           .json({ success: false, message: `Введен неверный пароль` });
       }
-      const token = generateAccessToken(user._id);
+      const token = generateAccessToken(user._id, user.email);
       const update = { token };
       await User.findByIdAndUpdate(user._id, update);
       return res.json({ success: true, token });
