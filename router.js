@@ -18,18 +18,21 @@ router.post(
   controller.registration
 );
 router.post("/login", controller.login);
-router.post("/createLesson", authMiddleware, controller.createLesson);
-router.post("/createLessons", authMiddleware, controller.createLessons);
-router.post("/lessonsByDate", authMiddleware, controller.getLessonsByDate);
-router.patch("/putLesson", authMiddleware, controller.updateLesson);
-router.patch("/updateLessons", authMiddleware, controller.updateLessons);
-router.delete("/deleteLesson", authMiddleware, controller.deleteLesson);
-router.delete("/deleteLessons", authMiddleware, controller.deleteLessons);
-router.post("/createLesson", authMiddleware, controller.createLesson);
-router.get("/getUsers", authMiddleware, controller.getAllUsers);
-router.get("/lessonsName", authMiddleware, controller.getLessonsName);
-router.get("/lessonCounts", authMiddleware, controller.getLessonCounts);
-router.get("/upcomingLessons", authMiddleware, controller.getUpcomingLessons);
+
+router.use(authMiddleware)
+
+router.post("/createLesson", controller.createLesson);
+router.post("/createLessons", controller.createLessons);
+router.post("/lessonsByDate", controller.getLessonsByDate);
+router.patch("/putLesson", controller.updateLesson);
+router.patch("/updateLessons", controller.updateLessons);
+router.delete("/deleteLesson", controller.deleteLesson);
+router.delete("/deleteLessons", controller.deleteLessons);
+router.post("/createLesson", controller.createLesson);
+router.get("/getUsers", controller.getAllUsers);
+router.get("/lessonsName", controller.getLessonsName);
+router.get("/lessonCounts", controller.getLessonCounts);
+router.get("/upcomingLessons", controller.getUpcomingLessons);
 
 
 
