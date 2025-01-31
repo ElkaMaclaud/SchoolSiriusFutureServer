@@ -250,9 +250,9 @@ class Controller {
       // await Lessons.create(lesson);
       const lesson = new Lessons(req.body);
       await Lessons.save(lesson);
-      res.status(201).json({  success: true,  message: "Lesson created" });
+      res.status(201).json({ success: true, message: "Lesson created" });
     } catch {
-      res.status(500).json({ success: false,  message: "Lessons created" });
+      res.status(500).json({ success: false, message: "Lessons created" });
     }
   }
   async createLessons(req, res) {
@@ -277,10 +277,10 @@ class Controller {
   async updateLesson(req, res) {
     try {
       const lesson = req.body
-      const lessonId = req.body._id; 
+      const lessonId = req.body._id;
       await Lessons.findOneAndUpdate({ _id: lessonId }, lesson, { new: true });
     } catch {
-      res.status(500).json({ success: false,  message: "Lessons created" });
+      res.status(500).json({ success: false, message: "Lessons created" });
     }
   }
   async updateLessons(req, res) {
@@ -294,14 +294,18 @@ class Controller {
       // }));
 
       await Lessons.bulkWrite(
-        lessons.map((lesson) => ({
-          updateOne: {
-            filter: { _id: lesson._id },
-            update: { $set: { date: lesson.date } },
-          },
-        }))
+        lessons.map((lesson) => {
+          if (lesson.modified) {
+            return {
+              updateOne: {
+                filter: { _id: lesson._id },
+                update: { $set: { date: lesson.date } },
+              },
+            };
+          }
+          return null; 
+        }).filter(Boolean)
       );
-
       res
         .status(200)
         .json({ success: true, message: "Данные успешно обновлены" });
@@ -313,18 +317,18 @@ class Controller {
   }
   async deleteLesson(req, res) {
     try {
-      const lessonId = req.params.id; 
+      const lessonId = req.params.id;
       await Lessons.findByIdAndDelete(lessonId)
     } catch {
-      res.status(500).json({ success: false,  message: "Lessons created" });
+      res.status(500).json({ success: false, message: "Lessons created" });
     }
   }
   async deleteLessons(req, res) {
     try {
-      const lessons = req.body; 
+      const lessons = req.body;
       await Lessons.deleteMany({ _id: { $in: lessons.map((l) => l._id) } });
     } catch {
-      res.status(500).json({ success: false,  message: "Lessons created" });
+      res.status(500).json({ success: false, message: "Lessons created" });
     }
   }
 }
